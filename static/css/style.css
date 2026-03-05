@@ -1,0 +1,233 @@
+/* static/css/style.css */
+/* Modern wedding invitation styles — mobile-first */
+:root{
+  /* palette — подгоните под Figma */
+  --bg:#faf7f5;
+  --card:#ffffffdd;
+  --muted:#7b6a63;
+  --accent:#a67c66;        /* основной акцент (кнопки) */
+  --accent-2:#f3e9e6;      /* мягкий фон */
+  --text:#231f20;
+  --soft:#efe8e5;
+  --shadow: 0 10px 30px rgba(35,31,32,0.08);
+
+  /* typography */
+  --ff-heading: 'Playfair Display', serif;
+  --ff-body: 'Inter', system-ui, -apple-system, "Segoe UI", Montserrat, "Helvetica Neue", Montserrat;
+  --base-font: 32px;
+
+
+  /* layout */
+  --container-max: 1200px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --gap: 1.25rem;
+  --transition: 220ms cubic-bezier(.2,.9,.3,1);
+}
+
+/* Reset & base */
+*{box-sizing:border-box}
+html{font-size:var(--base-font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{margin:0;font-family:var(--ff-body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-feature-settings:"liga" 1; -moz-font-feature-settings:"liga" 1}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* container helpers */
+.container{max-width:var(--container-max);margin:0 auto;padding:3rem 1rem}
+.container-tight{max-width:900px;margin:0 auto;padding:2rem 1rem}
+.row{display:flex;flex-wrap:wrap;gap:1rem}
+
+/* HERO */
+.hero{
+  min-height:75vh;
+  display:grid;
+  place-items:center;
+  position:relative;
+  background-image: url('/static/images/hero.jpg'); /* замените на ваш файл */
+  background-size:cover;
+  background-position:center;
+  border-bottom-left-radius:calc(var(--radius-lg) * 0.6);
+  border-bottom-right-radius:calc(var(--radius-lg) * 0.6);
+  overflow:hidden;
+}
+
+/* мягкий градиентный оверлей + мягкая текстура */
+.hero::before{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(35,31,32,0.22) 0%, rgba(255,255,255,0.08) 55%, rgba(255,255,255,0.3) 100%);
+  mix-blend-mode:normal;
+  pointer-events:none;
+}
+
+/* central card in hero */
+.hero .hero-card{
+  position:relative;
+  z-index:2;
+  width:min(920px,94%);
+  padding:2.25rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,255,255,0.58));
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);
+  text-align:center;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.6);
+}
+.hero h1{
+  margin:0 0 .4rem 0;
+  font-family:var(--ff-heading);
+  font-weight:700;
+  font-size: clamp(1.75rem, 4vw, 3.25rem);
+  letter-spacing:0.02em;
+  color:var(--text);
+}
+.hero p{
+  margin:0 0 1rem 0;
+  color:var(--muted);
+  font-size:clamp(.95rem, 2.2vw, 1.05rem);
+}
+.hero .cta{
+  display:inline-block;
+  padding:.7rem 1.25rem;
+  border-radius:10px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:600;
+  box-shadow: 0 6px 18px rgba(166,124,102,0.18);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.hero .cta:hover{ transform: translateY(-4px); box-shadow: 0 12px 30px rgba(166,124,102,0.22) }
+.hero .subnote{ margin-top:.75rem; color:var(--muted); font-size:.9rem }
+
+/* MAP (full width) */
+.map-section{
+  width:100%;
+  margin:0; padding:0;
+  background:var(--soft);
+}
+.map-wrapper{
+  width:100%;
+  height:60vh;
+  max-height:620px;
+  overflow:hidden;
+  display:block;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.map-wrapper iframe{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+
+/* TIMELINE — simple elegant list with timeline markers */
+.timeline{
+  background:var(--card);
+  padding:2.5rem 1rem;
+}
+
+.timeline .container{padding-top:0}
+.timeline h2{font-family:var(--ff-heading);font-weight:600;font-size:1.5rem;margin:0 0 1rem}
+
+.events{
+  display:block;
+  gap:1rem;
+  list-style:none;
+  padding:1px;
+  margin: 0;
+  line-height: 72px;
+}
+.event{
+  display:flex;
+  gap:1rem;
+  align-items:flex-start;
+}
+.event .time{
+  min-width:88px;
+  font-weight:700;
+  color:var(--accent);
+  font-family:var(--ff-heading);
+  font-size:.98rem;
+}
+.event .desc{color:var(--muted)}
+
+/* INFO GRID */
+.info{
+  padding:2.5rem 1rem;
+}
+.info h2{font-family:var(--ff-heading);font-size:1.25rem;margin-bottom:1rem}
+.info-grid{display:grid;grid-template-columns:1fr;gap:1rem}
+.info-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+  padding:1rem;border-radius:12px;border:1px solid rgba(0,0,0,0.03);box-shadow:var(--shadow)
+}
+
+/* RSVP — glass card, centered */
+.rsvp{
+  padding:2.5rem 1rem;
+}
+.rsvp .rsvp-inner{
+  max-width:720px;margin:0 auto;
+  background:linear-gradient(180deg, rgba(255,255,255,0.66), rgba(250,247,245,0.6));
+  border-radius:var(--radius-lg);
+  padding:1.25rem;
+  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,0.6);
+}
+.rsvp h2{font-family:var(--ff-heading);margin:0 0 0.75rem}
+.form-row{display:flex;flex-direction:column;gap:.75rem}
+.input, input[type="text"], textarea, select{
+  width:100%;padding:.72rem .85rem;border-radius:10px;border:1px solid rgba(35,31,32,0.06);font-size:1rem;background:transparent;outline:none;transition:box-shadow var(--transition), border-color var(--transition);
+}
+.input:focus, input[type="text"]:focus{box-shadow:0 6px 18px rgba(166,124,102,0.08);border-color:rgba(166,124,102,0.6)}
+.radios{display:flex;gap:1rem;align-items:center}
+.radio-label{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border-radius:10px;border:1px solid rgba(35,31,32,0.03);cursor:pointer;transition:background var(--transition), transform var(--transition)}
+.radio-label input{appearance:none;display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(35,31,32,0.15);position:relative}
+.radio-label input:checked{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 10px rgba(166,124,102,0.12)}
+.button{display:inline-block;padding:.7rem 1.1rem;border-radius:50px;background:var(--accent);color:#fff;font-weight:600;border:none;cursor:pointer;transition:transform var(--transition), box-shadow var(--transition)}
+.button.secondary{background:transparent;color:var(--accent);border:1px solid rgba(1166,124,102,0.12)}
+.form-note{font-size:.9rem;color:var(--muted);margin-top:.6rem}
+
+/* After submit block */
+.after-submit{display:none;margin-top:1rem;padding:1rem;border-radius:12px;background:linear-gradient(180deg, rgba(250,247,245,0.98), rgba(255,255,255,0.98));border:1px solid rgba(0,0,0,0.03)}
+.after-submit.visible{display:block}
+
+/* FOOTER with date + countdown */
+.site-footer{
+  padding:1rem 1rem;
+  background:transparent;
+}
+.footer-inner{max-width:var(--container-max);margin:0 auto;display:flex;gap:1rem;align-items:center;justify-content:space-between;padding:0 1rem}
+.footer-date{font-family:var(--ff-heading);font-weight:700}
+.countdown{
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  font-weight:700;
+  background:linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
+  padding:.45rem .7rem;border-radius:8px;border:1px solid rgba(0,0,0,0.04);
+}
+
+/* Utility & responsive */
+.hidden{display:none}
+.center{text-align:center}
+
+/* Accessibility: focus states */
+:focus{outline:3px solid rgba(166,124,102,0.18);outline-offset:3px}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *{transition:none!important}
+}
+
+/* Larger screens layout */
+@media(min-width:820px){
+  .info-grid{grid-template-columns:repeat(2,1fr)}
+  .events{grid-template-columns:repeat(2,1fr)}
+  .hero{min-height:82vh}
+  .map-wrapper{height:68vh}
+  .rsvp .form-row{flex-direction:row}
+  .rsvp .form-row > *{flex:1}
+}
+@media(min-width:1200px){
+  :root{--container-max:1200px}
+  .hero .hero-card{padding:3rem}
+}

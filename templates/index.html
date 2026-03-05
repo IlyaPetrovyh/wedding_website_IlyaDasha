@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Приглашение</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <section id="hero" class="hero" >
+    <div class="overlay">
+      <h1>Мы женимся</h1>
+      <p>Приглашаем вас разделить этот замечательный день вместе с нами</p>
+      <div class="subnote">20 июня — 15:30</div>
+    </div>
+  </section>
+
+   <section id="map" class="map-section">
+
+      <div class="map-wrapper"; style="position:relative;overflow:hidden;">
+          <a href="https://yandex.ru/maps/org/zelenino/174411448212/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:0px;">Зеленино</a>
+          <a href="https://yandex.ru/maps/50/perm/category/resort/184106400/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:14px;">База, дом отдыха в Перми</a>
+          <iframe src="https://yandex.ru/map-widget/v1/?ll=56.372395%2C57.962655&mode=poi&poi%5Bpoint%5D=56.369302%2C57.963199&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D174411448212&source=&z=16" width="560" height="400" frameborder="1" allowfullscreen="true" style="position:relative;"></iframe>
+      </div>
+
+  </section>
+
+  <!-- TIMELINE -->
+  <section id="timeline" class="timeline">
+    <div class="container" align="center">
+      <h2>Ход мероприятия</h2>
+      <ul class="events">
+        <li><strong>15:30</strong> Сбор гостей</li>
+        <li><strong>16:00</strong> Торжественная церемония</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- INFO FOR GUESTS -->
+  <section id="info" class="info">
+    <div class="container" align="center">
+      <h2>Информация для гостей</h2>
+      <div class="grid">
+        <div>
+          <h3>Дресс-код</h3>
+          <p>Коктейльный, пастельные тона.</p>
+        </div>
+        <div>
+          <h3>Транспорт</h3>
+          <p>Парковка рядом, трансфер по запросу.</p>
+        </div>
+        <div>
+          <h3>Проживание</h3>
+          <p>Ряд отелей в 10–15 минутах езды.</p>
+        </div>
+        <div>
+          <h3>Контакты</h3>
+          <p>email@example.com</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section id="rsvp" class="rsvp">
+    <div class="container" align="center">
+      <h2>Будем рады вас увидеть</h2>
+      <form id="rsvp-form">
+        <input type="text" name="first_name" id="first_name" placeholder="Укажите Имя" required>
+
+        <input type="text" name="last_name" id="last_name" placeholder="Фамилию" required>
+        <div class="radios">
+          <label><input type="radio" name="status" value="буду" checked> Точно буду</label>
+          <label><input type="radio" name="status" value="возможно"> Не уверен(а)</label>
+        </div>
+        <button type="submit">Отправить</button>
+      </form>
+
+      <div id="after-submit" class="hidden">
+        <p>Спасибо! Подтвердите переход в телеграм для подписки на рассылку.</p>
+        <a id="bot-link" class="button" target="_blank" rel="noopener noreferrer">Перейти в Telegram</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER: дата + таймер -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>20.06.2026</div>
+      <div id="countdown">—:—:—:—</div>
+    </div>
+  </footer>
+
+  <script>
+    // Передаём переменные из сервера
+    const BOT_USERNAME = "{{ bot_username }}";
+    const CEREMONY_DATE = "{{ ceremony_date }}";
+  </script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
