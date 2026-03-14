@@ -1,102 +1,94 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Приглашение</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свадьба Ильи и Даши</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
 </head>
-
 <body>
-    <section id="hero" class="hero" >
-    <div class="overlay">
-      <h1>Мы женимся</h1>
-      <p>Приглашаем вас разделить этот замечательный день вместе с нами</p>
-      <div class="subnote">20 июня — 15:30</div>
-    </div>
-  </section>
 
-   <section id="map" class="map-section">
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content fade-element">
+            <p class="date-top">20 | 06 | 2026</p>
+            <h1>Илья & Даша</h1>
+            <p class="subtitle">Приглашаем вас разделить с нами этот особенный день</p>
+        </div>
+    </section>
 
-      <div class="map-wrapper"; style="position:relative;overflow:hidden;">
+    <section class="map-section fade-element">
+        <h2>Место проведения</h2>
+        <div class="map-container"; type="text/javascript" charset="utf-8">
           <a href="https://yandex.ru/maps/org/zelenino/174411448212/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:0px;">Зеленино</a>
           <a href="https://yandex.ru/maps/50/perm/category/resort/184106400/?utm_medium=mapframe&utm_source=maps" style="color:#eee;font-size:12px;position:absolute;top:14px;">База, дом отдыха в Перми</a>
-          <iframe src="https://yandex.ru/map-widget/v1/?ll=56.372395%2C57.962655&mode=poi&poi%5Bpoint%5D=56.369302%2C57.963199&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D174411448212&source=&z=16" width="560" height="400" frameborder="1" allowfullscreen="true" style="position:relative;"></iframe>
-      </div>
-
-  </section>
-
-  <!-- TIMELINE -->
-  <section id="timeline" class="timeline">
-    <div class="container" align="center">
-      <h2>Ход мероприятия</h2>
-      <ul class="events">
-        <li><strong>15:30</strong> Сбор гостей</li>
-        <li><strong>16:00</strong> Торжественная церемония</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- INFO FOR GUESTS -->
-  <section id="info" class="info">
-    <div class="container" align="center">
-      <h2>Информация для гостей</h2>
-      <div class="grid">
-        <div>
-          <h3>Дресс-код</h3>
-          <p>Коктейльный, пастельные тона.</p>
+          <iframe src="https://yandex.ru/map-widget/v1/?ll=56.372395%2C57.962655&mode=poi&poi%5Bpoint%5D=56.369302%2C57.963199&poi%5Buri%5D=ymapsbm1%3A%2F%2Forg%3Foid%3D174411448212&source=&z=16" width="100%25&amp" height="400&amp" frameborder="1" allowfullscreen="true" style="position:relative;"></iframe>
         </div>
-        <div>
-          <h3>Транспорт</h3>
-          <p>Парковка рядом, трансфер по запросу.</p>
+    </section>
+
+    <section class="schedule-section fade-element">
+        <h2>Начало торжества</h2>
+        <div class="schedule-list">
+            <div class="schedule-item"><span>15:30</span> Сбор гостей и welcome-фуршет</div>
+            <div class="schedule-item"><span>16:00</span> Торжественная церемония</div>
         </div>
-        <div>
-          <h3>Проживание</h3>
-          <p>Ряд отелей в 10–15 минутах езды.</p>
+    </section>
+
+    <section class="info-section fade-element">
+        <h2>Информация для гостей</h2>
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>Дресс-код</h3>
+                <p>Мы будем рады, если вы при выборе своего наряда будете избегать данных цветов.</p>
+                <div class="color-palette">
+                    <div class="color-circle" style="background: #f9f7f5; border: 1px solid #ccc;"></div>
+                    <div class="color-circle" style="background: #e32636; border: 1px solid #ccc;"></div>
+                </div>
+            </div>
+            <div class="info-card">
+                <h3>Транспорт</h3>
+                <p><strong>Общественный транспорт</strong>: <br>Автобус №5 каждые 15 минут от Комсомольской площади.</p>
+                <p><strong>Такси</strong>: 25 минут от ЦУМа + 5 минут ожидание.</p>
+            </div>
+            <div class="info-card">
+                <p>Просим вас заменить комплимент в виде цветов на бутылочку вина в семейную коллекцию.</p>
+                <p>Также просим вас воздержаться на протяжении всего дня от криков «Горько»</p>
+            </div>
         </div>
-        <div>
-          <h3>Контакты</h3>
-          <p>email@example.com</p>
+    </section>
+
+    <section class="rsvp-section fade-element">
+        <h2>Присутствие</h2>
+        <p>Пожалуйста, подтвердите свое присутствие до <strong>01.05.2026</strong></p>
+
+        <form id="rsvp-form">
+            <input type="text" id="firstName" placeholder="Имя" required>
+            <input type="text" id="lastName" placeholder="Фамилия" required>
+
+            <div class="radio-group">
+                <label><input type="radio" name="status" value="буду" required> Я буду</label>
+                <label><input type="radio" name="status" value="возможно" required> Пока не знаю / Возможно</label>
+                <label><input type="radio" name="status" value="нет" required> К сожалению, не смогу</label>
+            </div>
+
+            <button type="submit" class="btn-submit">Отправить</button>
+        </form>
+
+        <div id="success-block" style="display: none;">
+            <h3>Спасибо за ответ!</h3>
+            <p>Чтобы быть в курсе всех новостей и изменений, перейдите в нашего Телеграм-бота:</p>
+            <a href="https://t.me/WedDAIL_bot" target="_blank" class="btn-telegram">Перейти в Telegram-бот</a>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- RSVP -->
-  <section id="rsvp" class="rsvp">
-    <div class="container" align="center">
-      <h2>Будем рады вас увидеть</h2>
-      <form id="rsvp-form">
-        <input type="text" name="first_name" id="first_name" placeholder="Укажите Имя" required>
-
-        <input type="text" name="last_name" id="last_name" placeholder="Фамилию" required>
-        <div class="radios">
-          <label><input type="radio" name="status" value="буду" checked> Точно буду</label>
-          <label><input type="radio" name="status" value="возможно"> Не уверен(а)</label>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-date">20.06.2026</div>
+            <div class="footer-timer" id="countdown">Загрузка таймера...</div>
         </div>
-        <button type="submit">Отправить</button>
-      </form>
+    </footer>
 
-      <div id="after-submit" class="hidden">
-        <p>Спасибо! Подтвердите переход в телеграм для подписки на рассылку.</p>
-        <a id="bot-link" class="button" target="_blank" rel="noopener noreferrer">Перейти в Telegram</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER: дата + таймер -->
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div>20.06.2026</div>
-      <div id="countdown">—:—:—:—</div>
-    </div>
-  </footer>
-
-  <script>
-    // Передаём переменные из сервера
-    const BOT_USERNAME = "{{ bot_username }}";
-    const CEREMONY_DATE = "{{ ceremony_date }}";
-  </script>
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

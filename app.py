@@ -1,94 +1,214 @@
-from flask import Flask, render_template, request, jsonify, send_file, abort, g
-import sqlite3
-import csv
-import io
 import os
+import telebot
+from flask import Flask, render_template, request, jsonify, abort
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from dotenv import load_dotenv
 
-DB_PATH = "rsvp.db"
-ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "replace_this_token")  # замените при деплое
-BOT_USERNAME = os.environ.get("BOT_USERNAME", "your_bot_username")  # без @
+# Загружаем секреты из .env
+load_dotenv()
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+ADMIN_ID = int(os.getenv('ADMIN_ID', 0))
+WEBHOOK_URL = os.getenv('WEBHOOK_URL')
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
-app.config["JSON_AS_ASCII"] = False
+# Инициализация Flask
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-def get_db():
-    if "db" not in g:
-        g.db = sqlite3.connect(DB_PATH, check_same_thread=False)
-        g.db.row_factory = sqlite3.Row
-    return g.db
+# Инициализация базы данных
+db = SQLAlchemy(app)
 
-def init_db():
-    db = get_db()
-    db.execute("""CREATE TABLE IF NOT EXISTS guests (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    first_name TEXT NOT NULL,
-                    last_name TEXT NOT NULL,
-                    status TEXT NOT NULL,
-                    created_at TEXT NOT NULL
-                  )""")
-    db.commit()
+# Инициализация бота
+bot = telebot.TeleBot(BOT_TOKEN)
 
-@app.teardown_appcontext
-def close_db(exc):
-    db = g.pop("db", None)
-    if db is not None:
-        db.close()
 
-@app.before_request
-def setup():
-    init_db()
+# --- МОДЕЛИ БАЗЫ ДАННЫХ ---
+class Guest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(20), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-@app.route("/")
+class Subscriber(db.Model):
+    tg_id = db.Column(db.Integer, primary_key=True)
+
+with app.app_context():
+    db.create_all()
+
+
+# --- МАРШРУТЫ САЙТА (WEB) ---
+@app.route('/')
 def index():
-    # Передаём username бота, и дату церемонии
-    ceremony_date = "2026-06-20T15:30:00"  # можно изменить
-    return render_template("index.html",
-                           bot_username=BOT_USERNAME,
-                           ceremony_date=ceremony_date)
+    return render_template('index.html')
 
-@app.route("/rsvp", methods=["POST"])
+@app.route('/api/rsvp', methods=['POST'])
 def rsvp():
-    data = request.get_json() or {}
-    first = (data.get("first_name") or "").strip()
-    last = (data.get("last_name") or "").strip()
-    status = (data.get("status") or "").strip()  # ожидается "буду" или "возможно"
+    data = request.json
+    if not data or not data.get('firstName') or not data.get('lastName'):
+        return jsonify({'error': 'Некорректные данные'}), 400
 
-    if not first or not last or status not in ("буду", "возможно"):
-        return jsonify({"ok": False, "error": "invalid_input"}), 400
-
-    db = get_db()
-    created_at = datetime.utcnow().isoformat()
-    db.execute(
-        "INSERT INTO guests (first_name, last_name, status, created_at) VALUES (?, ?, ?, ?)",
-        (first, last, status, created_at)
+    new_guest = Guest(
+        first_name=data['firstName'],
+        last_name=data['lastName'],
+        status=data['status']
     )
-    db.commit()
-    # Возвращаем deep link на бота, можно добавить start-параметр если нужно
-    bot_link = f"https://t.me/{BOT_USERNAME}"
-    return jsonify({"ok": True, "bot_link": bot_link})
 
-@app.route("/admin/export")
-def admin_export():
-    token = request.args.get("token", "")
-    if token != ADMIN_TOKEN:
+    db.session.add(new_guest)
+    db.session.commit()
+
+    # --- УВЕДОМЛЕНИЕ АДМИНИСТРАТОРУ ---
+    try:
+        status_text = data['status'].lower()
+        if status_text == "да":
+            icon = "✅"
+        elif status_text == "возможно":
+            icon = "❓"
+        elif status_text == "нет":
+            icon = "❌"
+        else:
+            icon = "⏺"
+
+        # Формируем текст сообщения
+        admin_message = (
+            f"🔔 <b>Новая заявка RSVP!</b>\n\n"
+            f"👤 Гость: {data['firstName']} {data['lastName']}\n"
+            f"📝 Статус: {data['status']} {icon}"
+        )
+
+        # Отправляем сообщение (переменная ADMIN_ID у нас уже загружена из .env)
+        bot.send_message(ADMIN_ID, admin_message, parse_mode='HTML')
+
+    except Exception as e:
+        # Логируем ошибку в консоль сервера, если сообщение не отправилось
+        print(f"Не удалось отправить уведомление администратору: {e}")
+    # ----------------------------------------------
+
+    return jsonify({'success': True, 'message': 'Очень вас ждем!'})
+
+
+# --- МАРШРУТ WEBHOOK (TELEGRAM) ---
+# Используем токен в URL для безопасности, чтобы посторонние не могли слать фальшивые запросы
+@app.route(f'/webhook/{BOT_TOKEN}', methods=['POST'])
+def webhook():
+    if request.headers.get('content-type') == 'application/json':
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return '', 200
+    else:
         abort(403)
-    db = get_db()
-    cur = db.execute("SELECT id, first_name, last_name, status, created_at FROM guests ORDER BY created_at")
-    rows = cur.fetchall()
 
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(["id", "first_name", "last_name", "status", "created_at"])
-    for r in rows:
-        writer.writerow([r["id"], r["first_name"], r["last_name"], r["status"], r["created_at"]])
 
-    buf.seek(0)
-    return send_file(io.BytesIO(buf.getvalue().encode("utf-8")),
-                     mimetype="text/csv",
-                     download_name="guests.csv",
-                     as_attachment=True)
+# --- ЛОГИКА БОТА ---
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-if __name__ == "__main__":
-    # Для локального запуска на Windows: python app.py
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    # Проверяем, кто пишет боту: админ или гость
+    if message.chat.id == ADMIN_ID:
+        markup.add(
+            telebot.types.KeyboardButton("👥 Список гостей"),
+            telebot.types.KeyboardButton("📢 Сделать рассылку")
+        )
+        bot.send_message(message.chat.id, "Панель администратора!", reply_markup=markup)
+    else:
+        markup.add(telebot.types.KeyboardButton("Подписаться на рассылку"))
+        bot.send_message(
+            message.chat.id,
+            "Привет! Я бот свадьбы Ильи и Даши 💍\nНажмите кнопку ниже, чтобы подписаться на рассылку новостей!",
+            reply_markup=markup
+        )
+
+# Обработка подписки для гостей
+@bot.message_handler(func=lambda message: message.text == "Подписаться на рассылку")
+def handle_subscription(message):
+    # Работаем с БД через Flask-SQLAlchemy (в контексте приложения)
+    with app.app_context():
+        exists = Subscriber.query.get(message.chat.id)
+        if not exists:
+            new_sub = Subscriber(tg_id=message.chat.id)
+            db.session.add(new_sub)
+            db.session.commit()
+            bot.send_message(message.chat.id, "✅ Вы успешно подписались на уведомления!")
+        else:
+            bot.send_message(message.chat.id, "Вы уже подписаны на обновления 😉")
+
+@bot.message_handler(func=lambda message: message.text in ["👥 Список гостей", "/guests"])
+def get_guests(message):
+    if message.chat.id != ADMIN_ID:
+        return
+
+    with app.app_context():
+        guests = Guest.query.all()
+
+    if not guests:
+        bot.send_message(message.chat.id, "Список гостей пока пуст.")
+        return
+
+    response = "📋 <b>Список гостей с сайта:</b>\n\n"
+    for idx, guest in enumerate(guests, 1):
+        status = guest.status.lower()
+        # Маршрутизация иконок в зависимости от статуса
+        if status == "да":
+            icon = "✅"
+        elif status == "возможно":
+            icon = "❓"
+        elif status == "нет":
+            icon = "❌"
+        else:
+            icon = "⏺"
+
+        response += f"{idx}. {guest.first_name} {guest.last_name} — {guest.status} {icon}\n"
+
+    bot.send_message(message.chat.id, response, parse_mode='HTML')
+
+#Интерактивная рассылка с обратной связью (Шаг 1)
+@bot.message_handler(func=lambda message: message.text in ["📢 Сделать рассылку", "/notify"])
+def start_notify(message):
+    if message.chat.id != ADMIN_ID:
+        return
+
+    # Запрашиваем текст и переводим бота в режим ожидания следующего сообщения
+    msg = bot.send_message(
+        message.chat.id,
+        "Введите текст сообщения для рассылки всем гостям:\n<i>(Для отмены напишите 'отмена')</i>",
+        parse_mode='HTML'
+    )
+    bot.register_next_step_handler(msg, process_notify_step)
+
+    # Обработка рассылки (Шаг 2)
+def process_notify_step(message):
+        text = message.text
+
+        if text.lower() == 'отмена':
+            bot.send_message(message.chat.id, "Рассылка отменена.")
+            return
+
+        with app.app_context():
+            subscribers = Subscriber.query.all()
+
+        count = 0
+        for sub in subscribers:
+            try:
+                bot.send_message(sub.tg_id, f"🔔 <b>Важное обновление:</b>\n\n{text}", parse_mode='HTML')
+                count += 1
+            except Exception as e:
+                # Если гость заблокировал бота, API выбросит исключение.
+                # Мы его перехватываем, чтобы цикл не прервался.
+                pass
+
+        bot.send_message(message.chat.id,
+                         f"✅ Рассылка успешно завершена.\nСообщение получили: {count} чел. из {len(subscribers)}.")
+
+
+if __name__ == '__main__':
+    # Снимаем Webhook на случай перезапуска
+    bot.remove_webhook()
+    # Если мы запускаем локально, Webhook работать не будет без туннеля (например ngrok).
+    # В боевых условиях раскомментируй строку ниже и укажи свой реальный домен:
+    bot.set_webhook(url=f"{WEBHOOK_URL}/webhook/{BOT_TOKEN}")
+
+    print("Приложение запущено...")
+    app.run(debug=True, host='0.0.0.0', port=5000)

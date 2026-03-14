@@ -1,233 +1,129 @@
-/* static/css/style.css */
-/* Modern wedding invitation styles — mobile-first */
-:root{
-  /* palette — подгоните под Figma */
-  --bg:#faf7f5;
-  --card:#ffffffdd;
-  --muted:#7b6a63;
-  --accent:#a67c66;        /* основной акцент (кнопки) */
-  --accent-2:#f3e9e6;      /* мягкий фон */
-  --text:#231f20;
-  --soft:#efe8e5;
-  --shadow: 0 10px 30px rgba(35,31,32,0.08);
-
-  /* typography */
-  --ff-heading: 'Playfair Display', serif;
-  --ff-body: 'Inter', system-ui, -apple-system, "Segoe UI", Montserrat, "Helvetica Neue", Montserrat;
-  --base-font: 32px;
-
-
-  /* layout */
-  --container-max: 1200px;
-  --radius-lg: 18px;
-  --radius-md: 12px;
-  --gap: 1.25rem;
-  --transition: 220ms cubic-bezier(.2,.9,.3,1);
+/* Базовые настройки и цвета */
+:root {
+    --bg-milk: #FDFBF7; /* Молочный */
+    --msu-green: #006633; /* Зеленый Мичиганский */
+    --text-dark: #333333;
+    --font-heading: 'TT Ricks', serif;
+    --font-text: 'Montserrat', sans-serif;
 }
 
-/* Reset & base */
-*{box-sizing:border-box}
-html{font-size:var(--base-font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-body{margin:0;font-family:var(--ff-body);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-feature-settings:"liga" 1; -moz-font-feature-settings:"liga" 1}
-a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
-
-/* container helpers */
-.container{max-width:var(--container-max);margin:0 auto;padding:3rem 1rem}
-.container-tight{max-width:900px;margin:0 auto;padding:2rem 1rem}
-.row{display:flex;flex-wrap:wrap;gap:1rem}
-
-/* HERO */
-.hero{
-  min-height:75vh;
-  display:grid;
-  place-items:center;
-  position:relative;
-  background-image: url('/static/images/hero.jpg'); /* замените на ваш файл */
-  background-size:cover;
-  background-position:center;
-  border-bottom-left-radius:calc(var(--radius-lg) * 0.6);
-  border-bottom-right-radius:calc(var(--radius-lg) * 0.6);
-  overflow:hidden;
+body, html {
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-milk);
+    color: var(--text-dark);
+    font-family: var(--font-text);
+    overflow-x: hidden;
 }
 
-/* мягкий градиентный оверлей + мягкая текстура */
-.hero::before{
-  content:"";
-  position:absolute;inset:0;
-  background:linear-gradient(180deg, rgba(35,31,32,0.22) 0%, rgba(255,255,255,0.08) 55%, rgba(255,255,255,0.3) 100%);
-  mix-blend-mode:normal;
-  pointer-events:none;
+h1, h2, h3 {
+    font-family: var(--font-heading);
+    color: var(--msu-green);
+    text-align: center;
 }
 
-/* central card in hero */
-.hero .hero-card{
-  position:relative;
-  z-index:2;
-  width:min(920px,94%);
-  padding:2.25rem;
-  background: linear-gradient(180deg, rgba(255,255,255,0.66), rgba(255,255,255,0.58));
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow);
-  text-align:center;
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255,255,255,0.6);
-}
-.hero h1{
-  margin:0 0 .4rem 0;
-  font-family:var(--ff-heading);
-  font-weight:700;
-  font-size: clamp(1.75rem, 4vw, 3.25rem);
-  letter-spacing:0.02em;
-  color:var(--text);
-}
-.hero p{
-  margin:0 0 1rem 0;
-  color:var(--muted);
-  font-size:clamp(.95rem, 2.2vw, 1.05rem);
-}
-.hero .cta{
-  display:inline-block;
-  padding:.7rem 1.25rem;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  font-weight:600;
-  box-shadow: 0 6px 18px rgba(166,124,102,0.18);
-  transition: transform var(--transition), box-shadow var(--transition);
-}
-.hero .cta:hover{ transform: translateY(-4px); box-shadow: 0 12px 30px rgba(166,124,102,0.22) }
-.hero .subnote{ margin-top:.75rem; color:var(--muted); font-size:.9rem }
+h2 { font-size: 3.5rem; margin-bottom: 20px; }
 
-/* MAP (full width) */
-.map-section{
-  width:100%;
-  margin:0; padding:0;
-  background:var(--soft);
-}
-.map-wrapper{
-  width:100%;
-  height:60vh;
-  max-height:620px;
-  overflow:hidden;
-  display:block;
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-}
-.map-wrapper iframe{
-  width:100%;
-  height:100%;
-  border:0;
-  display:block;
+h3 { font-size: 2.0rem; margin-bottom: 20px; }
+
+/* 1. Hero Section */
+.hero {
+    position: relative;
+    height: 100vh;
+    background: url('../images/hero-bg.jpg') center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
-/* TIMELINE — simple elegant list with timeline markers */
-.timeline{
-  background:var(--card);
-  padding:2.5rem 1rem;
+.hero-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
 }
 
-.timeline .container{padding-top:0}
-.timeline h2{font-family:var(--ff-heading);font-weight:600;font-size:1.5rem;margin:0 0 1rem}
+/*.hero-content {
+    position: relative;
+    z-index: 2;
+    background: rgba(253, 251, 247, 0.85);
+    padding: 40px;
+    border-radius: 15px;
+}*/
 
-.events{
-  display:block;
-  gap:1rem;
-  list-style:none;
-  padding:1px;
-  margin: 0;
-  line-height: 72px;
-}
-.event{
-  display:flex;
-  gap:1rem;
-  align-items:flex-start;
-}
-.event .time{
-  min-width:88px;
-  font-weight:700;
-  color:var(--accent);
-  font-family:var(--ff-heading);
-  font-size:.98rem;
-}
-.event .desc{color:var(--muted)}
+.hero-content h1 { font-size: 4rem; margin: 10px 0; color: #eff4e6; }
+.date-top { letter-spacing: 5px; color: #eff4e6; font-weight: bold;}
+.subtitle {color: #eff4e6; font-family: 'TT Ricks'; letter-spacing: 1.5px; font-size: 1.1rem}
 
-/* INFO GRID */
-.info{
-  padding:2.5rem 1rem;
-}
-.info h2{font-family:var(--ff-heading);font-size:1.25rem;margin-bottom:1rem}
-.info-grid{display:grid;grid-template-columns:1fr;gap:1rem}
-.info-card{
-  background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
-  padding:1rem;border-radius:12px;border:1px solid rgba(0,0,0,0.03);box-shadow:var(--shadow)
-}
+/* Секции с отступами */
+section { padding: 80px 20px; max-width: 800px; margin: 0 auto; }
 
-/* RSVP — glass card, centered */
-.rsvp{
-  padding:2.5rem 1rem;
-}
-.rsvp .rsvp-inner{
-  max-width:720px;margin:0 auto;
-  background:linear-gradient(180deg, rgba(255,255,255,0.66), rgba(250,247,245,0.6));
-  border-radius:var(--radius-lg);
-  padding:1.25rem;
-  box-shadow:var(--shadow);
-  border:1px solid rgba(255,255,255,0.6);
-}
-.rsvp h2{font-family:var(--ff-heading);margin:0 0 0.75rem}
-.form-row{display:flex;flex-direction:column;gap:.75rem}
-.input, input[type="text"], textarea, select{
-  width:100%;padding:.72rem .85rem;border-radius:10px;border:1px solid rgba(35,31,32,0.06);font-size:1rem;background:transparent;outline:none;transition:box-shadow var(--transition), border-color var(--transition);
-}
-.input:focus, input[type="text"]:focus{box-shadow:0 6px 18px rgba(166,124,102,0.08);border-color:rgba(166,124,102,0.6)}
-.radios{display:flex;gap:1rem;align-items:center}
-.radio-label{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .6rem;border-radius:10px;border:1px solid rgba(35,31,32,0.03);cursor:pointer;transition:background var(--transition), transform var(--transition)}
-.radio-label input{appearance:none;display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(35,31,32,0.15);position:relative}
-.radio-label input:checked{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 10px rgba(166,124,102,0.12)}
-.button{display:inline-block;padding:.7rem 1.1rem;border-radius:50px;background:var(--accent);color:#fff;font-weight:600;border:none;cursor:pointer;transition:transform var(--transition), box-shadow var(--transition)}
-.button.secondary{background:transparent;color:var(--accent);border:1px solid rgba(1166,124,102,0.12)}
-.form-note{font-size:.9rem;color:var(--muted);margin-top:.6rem}
+/* 2. Карта */
+.map-section { max-width: 100%; padding: 80px 0; }
+.map-container { height: 400px; background: rgba(253, 251, 247, 0.4);
+    width: 90%;
+    max-width: 1170px;
+    margin: 0 auto;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;}
 
-/* After submit block */
-.after-submit{display:none;margin-top:1rem;padding:1rem;border-radius:12px;background:linear-gradient(180deg, rgba(250,247,245,0.98), rgba(255,255,255,0.98));border:1px solid rgba(0,0,0,0.03)}
-.after-submit.visible{display:block}
-
-/* FOOTER with date + countdown */
-.site-footer{
-  padding:1rem 1rem;
-  background:transparent;
+/* 3. График */
+.schedule-section { background-color: var(--msu-green); color: var(--bg-milk); border-radius: 130px;}
+.schedule-section h2 { color: var(--bg-milk); font-size: 3.6rem}
+.schedule-item {
+    padding: 15px 0;
+    text-align: center;
+    border-bottom: 1px solid rgba(253, 251, 247, 0.3);
+    font-size: 1.45rem;
 }
-.footer-inner{max-width:var(--container-max);margin:0 auto;display:flex;gap:1rem;align-items:center;justify-content:space-between;padding:0 1rem}
-.footer-date{font-family:var(--ff-heading);font-weight:700}
-.countdown{
-  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
-  font-weight:700;
-  background:linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0.65));
-  padding:.45rem .7rem;border-radius:8px;border:1px solid rgba(0,0,0,0.04);
+.schedule-item span { font-weight: bold; margin-right: 15px; font-family: var(--font-heading); font-size: 2.2rem;}
+
+/* 4. Инфо (Дресс-код и т.д.) */
+.info-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+.info-card { flex: 1; min-width: 300px; text-align: center; padding: 20px; border: 1px solid var(--msu-green); border-radius: 10px;}
+.color-palette { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+.color-circle { width: 40px; height: 40px; border-radius: 50%; }
+
+/* 5. RSVP форма */
+.rsvp-section { text-align: center; }
+form { display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 0 auto; }
+input[type="text"] {
+    padding: 15px; border: 1px solid var(--msu-green); border-radius: 5px;
+    background: transparent; font-family: var(--font-text); outline: none;
+}
+.radio-group { display: flex; justify-content: space-around; margin: 10px 0; }
+button {
+    background: var(--msu-green); color: var(--bg-milk);
+    padding: 15px; border: none; border-radius: 5px; cursor: pointer;
+    font-size: 1.1rem; font-family: var(--font-heading); text-transform: uppercase;
+    transition: opacity 0.3s;
+}
+button:hover { opacity: 0.8; }
+.btn-telegram {
+    display: inline-block; margin-top: 15px; background: #0088cc; /* Цвет ТГ */
+    color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px;
 }
 
-/* Utility & responsive */
-.hidden{display:none}
-.center{text-align:center}
+/* 6. Футер */
+footer {
+    background: var(--msu-green); color: var(--bg-milk);
+    padding: 30px 20px; text-align: center;
+}
+.footer-content { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto; font-family: var(--font-heading); font-size: 1.5rem;}
 
-/* Accessibility: focus states */
-:focus{outline:3px solid rgba(166,124,102,0.18);outline-offset:3px}
-
-/* Reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *{transition:none!important}
+/* Анимации плавного появления при скролле */
+.fade-element {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.fade-element.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-/* Larger screens layout */
-@media(min-width:820px){
-  .info-grid{grid-template-columns:repeat(2,1fr)}
-  .events{grid-template-columns:repeat(2,1fr)}
-  .hero{min-height:82vh}
-  .map-wrapper{height:68vh}
-  .rsvp .form-row{flex-direction:row}
-  .rsvp .form-row > *{flex:1}
-}
-@media(min-width:1200px){
-  :root{--container-max:1200px}
-  .hero .hero-card{padding:3rem}
+/* Адаптивность для мобилок */
+@media(max-width: 600px) {
+    .footer-content { flex-direction: column; gap: 15px; }
 }
