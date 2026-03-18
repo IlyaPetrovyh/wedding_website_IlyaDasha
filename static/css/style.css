@@ -131,3 +131,16 @@ footer {
 @media(max-width: 600px) {
     .footer-content { flex-direction: column; gap: 15px; }
 }
+
+
+curl -X PATCH "https://api.cloudflare.com/client/v4/zones/38138a89e280b389a1c81c9e9f38e613/settings/ech" \
+     -H "X-Auth-Email: ilya.petrovyh01@mail.ru" \
+     -H "X-Auth-Key: f0f6b281f97300fae39841468743bb42e619c" \
+     -H "Content-Type: application/json" \
+     --data '{"id":"ech","value":"off"}'
+
+curl -X PATCH "https://api.cloudflare.com/client/v4/zones/38138a89e280b389a1c81c9e9f38e613/settings/http3" \
+     -H "X-Auth-Email: ilya.petrovyh01@mail.ru" \
+     -H "X-Auth-Key: f0f6b281f97300fae39841468743bb42e619c" \
+     -H "Content-Type: application/json" \
+     --data '{"id":"http3","value":"off"}'
