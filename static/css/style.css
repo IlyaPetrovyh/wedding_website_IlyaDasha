@@ -1,11 +1,23 @@
-/* Базовые настройки и цвета */
+/* ═══════════════════════════════════════════════
+   БАЗОВЫЕ ПЕРЕМЕННЫЕ
+═══════════════════════════════════════════════ */
 :root {
-    --bg-milk: #FDFBF7; /* Молочный */
-    --msu-green: #006633; /* Зеленый Мичиганский */
-    --text-dark: #333333;
-    --font-heading: 'TT Ricks', serif;
-    --font-text: 'Montserrat', sans-serif;
+    --bg-milk:     #FDFBF7;
+    --msu-green:   #006633;
+    --msu-light:   #e8f0ea;
+    --text-dark:   #333333;
+    --text-muted:  #777777;
+    --font-heading:'Cormorant Garamond', serif;
+    --font-text:   'Montserrat', sans-serif;
+    --shadow-soft: 0 4px 20px rgba(0,0,0,0.08);
+    --radius:      14px;
+    --transition:  0.35s cubic-bezier(0.4,0,0.2,1);
 }
+
+/* ═══════════════════════════════════════════════
+   RESET / БАЗА
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
 
 body, html {
     margin: 0;
@@ -20,21 +32,22 @@ h1, h2, h3 {
     font-family: var(--font-heading);
     color: var(--msu-green);
     text-align: center;
+    margin: 0 0 20px;
 }
+h2 { font-size: clamp(2.2rem, 5vw, 3.5rem); }
+h3 { font-size: clamp(1.4rem, 3vw, 2rem); }
 
-h2 { font-size: 3.5rem; margin-bottom: 20px; }
-
-h3 { font-size: 2.0rem; margin-bottom: 20px; }
-
-/* 1. Hero Section */
+/* ═══════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════ */
 .hero {
-    background-color: #006633;
-    background-image: url('../images/hero-bg.webp') /*center/cover no-repeat*/;
+    background-color: var(--msu-green);
+    background-image: url('../images/hero-bg.webp');
     background-size: cover;
     background-position: center;
-    transition: background 0.5s ease-in-out;
     position: relative;
     height: 100vh;
+    min-height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43,182 +56,583 @@ h3 { font-size: 2.0rem; margin-bottom: 20px; }
 
 .hero-overlay {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
+    inset: 0;
+    background: rgba(0, 40, 20, 0.35);
 }
 
-/*.hero-content {
+.hero-content {
     position: relative;
     z-index: 2;
-    background: rgba(253, 251, 247, 0.85);
-    padding: 40px;
-    border-radius: 15px;
-}*/
+}
 
-.hero-content h1 { font-size: 4rem; margin: 10px 0; color: #eff4e6; }
-.date-top { letter-spacing: 5px; color: #eff4e6; font-weight: bold;}
-.subtitle {color: #eff4e6; font-family: 'TT Ricks'; letter-spacing: 1.5px; font-size: 1.1rem}
+.hero-content h1 {
+    font-size: clamp(2.8rem, 8vw, 5rem);
+    color: #eff4e6;
+    margin: 8px 0;
+}
 
-/* Секции с отступами */
-section { padding: 80px 20px; max-width: 800px; margin: 0 auto; }
+.date-top {
+    letter-spacing: 6px;
+    color: #eff4e6;
+    font-weight: 500;
+    font-size: 1rem;
+    font-family: var(--font-text);
+}
 
-/* 2. Карта */
-.map-section { max-width: 100%; padding: 80px 0; }
-.map-container { height: 400px; background: rgba(253, 251, 247, 0.4);
+.subtitle {
+    color: rgba(239,244,230,0.9);
+    font-family: var(--font-heading);
+    font-style: italic;
+    letter-spacing: 1px;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+}
+
+/* ═══════════════════════════════════════════════
+   ОБЩИЕ СЕКЦИИ
+═══════════════════════════════════════════════ */
+section {
+    padding: 80px 20px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════
+   КАРТА
+═══════════════════════════════════════════════ */
+.map-section {
+    max-width: 100%;
+    padding: 80px 0;
+}
+
+.map-container {
+    position: relative;
     width: 90%;
     max-width: 1170px;
     margin: 0 auto;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 16px;
-    padding-right: 16px;}
+    height: 400px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+}
 
-/* 3. График */
-.schedule-section { background-color: var(--msu-green); color: var(--bg-milk); border-radius: 130px;}
-.schedule-section h2 { color: var(--bg-milk); font-size: 3.6rem}
+.map-container iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+
+/* ═══════════════════════════════════════════════
+   РАСПИСАНИЕ
+═══════════════════════════════════════════════ */
+.schedule-section {
+    background-color: var(--msu-green);
+    color: var(--bg-milk);
+    border-radius: 100px;
+    max-width: 900px;
+}
+
+.schedule-section h2 { color: var(--bg-milk); }
+
 .schedule-item {
-    padding: 15px 0;
+    padding: 18px 0;
     text-align: center;
-    border-bottom: 1px solid rgba(253, 251, 247, 0.3);
-    font-size: 1.45rem;
-}
-.schedule-item span { font-weight: bold; margin-right: 15px; font-family: var(--font-heading); font-size: 2.2rem;}
-
-/* 4. Инфо (Дресс-код и т.д.) */
-.info-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-.info-card { flex: 1; min-width: 300px; text-align: center; padding: 20px; border: 1px solid var(--msu-green); border-radius: 10px;}
-.color-palette { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-.color-circle { width: 40px; height: 40px; border-radius: 50%; }
-
-/* --- Секция Галереи --- */
-.gallery-section { text-align: center; margin: 40px 0;
-overflow: hidden; /* Важно для скрытия ползущих элементов за пределами экрана */
+    border-bottom: 1px solid rgba(253,251,247,0.25);
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-family: var(--font-text);
 }
 
-.gallery-wrapper {
-    width: 100vw; /* Занимает всю ширину экрана */
+.schedule-item:last-child { border-bottom: none; }
+
+.schedule-item span {
+    font-weight: 700;
+    margin-right: 14px;
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+/* ═══════════════════════════════════════════════
+   ИНФОРМАЦИЯ ДЛЯ ГОСТЕЙ
+═══════════════════════════════════════════════ */
+.info-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.info-card {
+    flex: 1;
+    min-width: 240px;
+    text-align: center;
+    padding: 28px 22px;
+    border: 1.5px solid var(--msu-green);
+    border-radius: var(--radius);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+    transition: transform var(--transition);
+}
+
+.info-card:hover { transform: translateY(-4px); }
+
+.color-palette {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.color-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+/* ═══════════════════════════════════════════════
+   ГАЛЕРЕЯ — СЕКЦИЯ
+═══════════════════════════════════════════════ */
+.gallery-section {
+    max-width: 100%;
+    padding: 80px 0;
+    text-align: center;
+    /* Сброс авто-центрирования секций */
+    margin: 0;
+    width: 100%;
+}
+
+.gallery-section h2,
+.gallery-section .gallery-subtitle {
+    max-width: 860px;
+    margin-left:  auto;
+    margin-right: auto;
+    padding: 0 20px;
+}
+
+.gallery-subtitle {
+    display: block;
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-bottom: 30px;
+    font-family: var(--font-text);
+}
+
+/* ═══════════════════════════════════════════════
+   КНОПКА ЗАГРУЗКИ
+═══════════════════════════════════════════════ */
+.upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 30px;
+    background: var(--msu-green);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: var(--font-text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 40px;
+    transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+    box-shadow: 0 4px 16px rgba(0,102,51,0.25);
+}
+
+.upload-btn:hover {
+    background: #005229;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(0,102,51,0.35);
+}
+
+.upload-btn-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════
+   КАРУСЕЛЬ
+═══════════════════════════════════════════════ */
+.carousel-wrapper {
     position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 20px 0;
-    background: #fafafa;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 10px 0 20px;
+    overflow: hidden;           /* скрывает элементы вне поля */
 }
 
-.gallery-track {display: flex;gap: 20px;width: max-content;
-    /* Анимация: 60 секунд на один полный цикл, линейно, бесконечно */
-    animation: scrollGallery 60s linear infinite;
+.carousel-viewport {
+    /* Ширина «окна» карусели — показываем ~3 карточки */
+    width: min(960px, 92vw);
+    overflow: hidden;
+    border-radius: var(--radius);
 }
 
-/* Пауза анимации при наведении мыши */
-.gallery-track:hover {
-    animation-play-state: paused;
+.carousel-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
 }
 
+/* ═══════════════════════════════════════════════
+   КАРТОЧКИ ГАЛЕРЕИ
+═══════════════════════════════════════════════ */
 .gallery-item {
     position: relative;
-    width: 300px;
-    height: 200px;
-    border-radius: 12px;
-    overflow: hidden;
+    /* Ровно 1/3 ширины viewport минус gap */
+    width: calc((min(960px, 92vw) - 32px) / 3);
     flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
+    height: 220px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-soft);
+    background: #e8eae8;
     cursor: pointer;
-    background: #eaeaea; /* Placeholder color */
+    transition: transform var(--transition), box-shadow var(--transition);
 }
 
 .gallery-item:hover {
-    transform: translateY(-5px); /* Легкий эффект поднятия */
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
 }
 
 .gallery-item img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Изображение заполняет блок без искажения пропорций */
+    object-fit: cover;
     pointer-events: none;
+    display: block;
+    transition: opacity 0.4s ease;
 }
 
 .video-icon {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    width: 50px;
-    height: 50px;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-icon::after {
+    content: '▶';
+    width: 52px;
+    height: 52px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 22px;
+    backdrop-filter: blur(2px);
+}
+
+/* Скелетон-заглушка */
+.gallery-item.skeleton {
+    background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   СТРЕЛКИ КАРУСЕЛИ
+═══════════════════════════════════════════════ */
+.carousel-arrow {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 2px solid var(--msu-green);
+    background: var(--bg-milk);
+    color: var(--msu-green);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    z-index: 5;
+    box-shadow: var(--shadow-soft);
+    /* Выносим стрелки за viewport */
+    position: absolute;
+}
+
+.carousel-arrow--left  { left:  calc((100% - min(960px,92vw)) / 2 - 26px); }
+.carousel-arrow--right { right: calc((100% - min(960px,92vw)) / 2 - 26px); }
+
+.carousel-arrow:hover {
+    background: var(--msu-green);
+    color: #fff;
+}
+
+.carousel-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
     pointer-events: none;
 }
 
-/* Сдвигаем трек на 50% */
-@keyframes scrollGallery {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-}
-
-/* Кнопка Яндекс Диска */
-.drive-upload-btn {
-    display: inline-flex;
+/* ═══════════════════════════════════════════════
+   ТОЧКИ-ИНДИКАТОРЫ
+═══════════════════════════════════════════════ */
+.carousel-dots {
+    display: flex;
     justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+    padding: 0;
+}
+
+.carousel-dot.active {
+    background: var(--msu-green);
+    transform: scale(1.3);
+}
+
+/* ═══════════════════════════════════════════════
+   МОДАЛКА ЗАГРУЗКИ
+═══════════════════════════════════════════════ */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
     align-items: center;
-    width: 150px;
-    height: 60px;
-    margin: 20px auto 40px;
-    background-color: #ffffff;
-    border: 2px dashed #9aa0a6;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: all 0.2s ease-in-out;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
-.drive-upload-btn:hover {
-    background-color: #f8f9fa;
-    border-color: #1a73e8;
+.modal-backdrop.open {
+    opacity: 1;
+    pointer-events: all;
 }
 
-.plus-icon {
-    font-size: 36px;
-    color: #5f6368;
+.modal-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-backdrop.open .modal-box {
+    transform: translateY(0);
+}
+
+.modal-box h3 {
+    color: var(--msu-green);
+    margin-bottom: 6px;
+}
+
+.modal-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #999;
+    cursor: pointer;
     line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
 }
 
-/* 6. Футер */
+.modal-close:hover { background: #f0f0f0; }
+
+/* Зона перетаскивания */
+.drop-zone {
+    border: 2px dashed #c8d8cc;
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: #f9fbf9;
+}
+
+.drop-zone.dragover {
+    border-color: var(--msu-green);
+    background: var(--msu-light);
+}
+
+.drop-zone-content p {
+    margin: 8px 0 0;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.drop-zone-content p span { color: var(--text-muted); }
+
+.drop-hint {
+    font-size: 0.78rem !important;
+    color: var(--text-muted) !important;
+    margin-top: 6px !important;
+}
+
+.drop-icon { font-size: 2.5rem; }
+
+/* Очередь файлов */
+.upload-queue {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.queue-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.queue-item-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.queue-item-status { font-size: 1rem; }
+
+.queue-item-status.ok     { color: #2e7d32; }
+.queue-item-status.error  { color: #c62828; }
+.queue-item-status.loading { animation: spin 1s linear infinite; display:inline-block; }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Кнопка отправки */
+.upload-submit-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--msu-green);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: var(--font-text);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), opacity var(--transition);
+}
+
+.upload-submit-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.upload-submit-btn:not(:disabled):hover { background: #005229; }
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
 footer {
-    background: var(--msu-green); color: var(--bg-milk);
-    padding: 30px 20px; text-align: center;
+    background: var(--msu-green);
+    color: var(--bg-milk);
+    padding: 32px 20px;
+    text-align: center;
 }
-.footer-content { display: flex; justify-content: space-between; max-width: 800px; margin: 0 auto; font-family: var(--font-heading); font-size: 1.5rem;}
 
-/* Анимации плавного появления при скролле */
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: var(--font-heading);
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLL-АНИМАЦИИ
+═══════════════════════════════════════════════ */
 .fade-element {
     opacity: 0;
     transform: translateY(40px);
     transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
+
 .fade-element.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
-/* Адаптивность для мобилок */
-@media(max-width: 600px) {
-    .footer-content { flex-direction: column; gap: 15px; }
+/* ═══════════════════════════════════════════════
+   АДАПТИВНОСТЬ
+═══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+    /* На планшетах — 2 карточки */
+    .gallery-item {
+        width: calc((min(960px, 92vw) - 16px) / 2);
+    }
+
+    .carousel-arrow--left  { left:  4px; }
+    .carousel-arrow--right { right: 4px; }
+
+    .carousel-arrow {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
 }
 
+@media (max-width: 560px) {
+    /* На мобилках — 1 карточка */
+    .gallery-item {
+        width: min(92vw, 340px);
+        height: 240px;
+    }
 
-curl -X PATCH "https://api.cloudflare.com/client/v4/zones/38138a89e280b389a1c81c9e9f38e613/settings/ech" \
-     -H "X-Auth-Email: ilya.petrovyh01@mail.ru" \
-     -H "X-Auth-Key: f0f6b281f97300fae39841468743bb42e619c" \
-     -H "Content-Type: application/json" \
-     --data '{"id":"ech","value":"off"}'
+    .carousel-arrow--left  { left:  6px; }
+    .carousel-arrow--right { right: 6px; }
 
-curl -X PATCH "https://api.cloudflare.com/client/v4/zones/38138a89e280b389a1c81c9e9f38e613/settings/http3" \
-     -H "X-Auth-Email: ilya.petrovyh01@mail.ru" \
-     -H "X-Auth-Key: f0f6b281f97300fae39841468743bb42e619c" \
-     -H "Content-Type: application/json" \
-     --data '{"id":"http3","value":"off"}'
+    .footer-content { flex-direction: column; }
+
+    .schedule-section { border-radius: 40px; }
+
+    .modal-box { padding: 28px 20px; }
+}
