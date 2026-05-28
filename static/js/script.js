@@ -122,20 +122,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Кнопки-стрелки
-    prevBtn.addEventListener('click', () => goTo(currentIndex - 1));
-    nextBtn.addEventListener('click', () => goTo(currentIndex + 1));
+    prevBtn.addEventListener('click', () => goTo(currentIndex - 2));
+    nextBtn.addEventListener('click', () => goTo(currentIndex + 3));
 
     // Свайп на мобилках
     let touchStartX = 0;
     viewport.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
     viewport.addEventListener('touchend',   e => {
         const dx = e.changedTouches[0].clientX - touchStartX;
-        if (Math.abs(dx) > 50) goTo(dx < 0 ? currentIndex + 1 : currentIndex - 1);
+        if (Math.abs(dx) > 50) goTo(dx < 0 ? currentIndex + 3 : currentIndex - 2);
     });
 
     // Адаптация при изменении размера окна
     window.addEventListener('resize', () => resizeItems());
 
+
+    // ──────────────────────────────────────────
+    // Автопрокрутка карусели
+    // ──────────────────────────────────────────
+    const AUTOPLAY_DELAY = 2600;   // мс между прокрутками — меняй по вкусу
+    let autoplayTimer = null;
+
+    function startAutoplay() {
+        stopAutoplay();
+        autoplayTimer = setInterval(() => {
+            const maxIndex = Math.max(0, items.length - itemsPerPage);
+            // Дошли до конца — возвращаемся в начало
+            goTo(currentIndex >= maxIndex ? 0 : currentIndex + 1);
+        }, AUTOPLAY_DELAY);
+    }
+
+    function stopAutoplay() {
+        if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
+    }
+
+    // Пауза при наведении мыши или касании
+    viewport.addEventListener('mouseenter', stopAutoplay);
+    viewport.addEventListener('mouseleave', startAutoplay);
+    viewport.addEventListener('touchstart',  stopAutoplay,  { passive: true });
+    viewport.addEventListener('touchend',    startAutoplay, { passive: true });
+
+    // Также останавливаем при ручном нажатии стрелок
+    prevBtn.addEventListener('click', () => { stopAutoplay(); startAutoplay(); });
+    nextBtn.addEventListener('click', () => { stopAutoplay(); startAutoplay(); });
 
     // ──────────────────────────────────────────
     // 4. Загрузка данных галереи с /api/gallery
@@ -160,20 +189,44 @@ document.addEventListener("DOMContentLoaded", () => {
         // Убираем скелетоны
         track.innerHTML = '';
 
-        data.forEach(item => {
+        data.forEach((item, idx) => {
             const link = document.createElement('a');
-            link.href        = item.original || '#';
-            link.target      = '_blank';
-            link.className   = 'gallery-item';
-            link.rel         = 'noopener noreferrer';
+            link.href      = item.original || '#';
+            link.target    = '_blank';
+            link.rel       = 'noopener noreferrer';
+            link.className = 'gallery-item';
+
+            // Ориентация по метаданным — сразу, до загрузки картинки
+            const w = item.width  || 0;
+            const h = item.height || 0;
+            if (w && h) {
+                link.classList.add(h > w * 1.05 ? 'portrait' : 'landscape');
+            }
 
             const img = document.createElement('img');
-            img.src     = item.preview;
+            img.src     = item.thumb;
             img.alt     = item.name;
-            img.loading = 'lazy';
-            img.style.opacity = '0';
-            img.addEventListener('load',  () => { img.style.opacity = '1'; });
-            img.addEventListener('error', () => { link.style.background = '#dde5dd'; });
+            // Первые 3 карточки грузим с высоким приоритетом, остальные — лениво
+            if (idx < 3) {
+                img.loading        = 'eager';
+                img.fetchPriority  = 'high';
+            } else {
+                img.loading       = 'lazy';
+                img.fetchPriority = 'low';
+            }
+
+            img.addEventListener('load', () => {
+                link.classList.add('loaded');   // убирает shimmer, показывает картинку
+                // Если метаданных не было — определяем ориентацию по реальным размерам
+                if (!w || !h) {
+                    link.classList.add(img.naturalHeight > img.naturalWidth * 1.05 ? 'portrait' : 'landscape');
+                    resizeItems();
+                }
+            });
+            img.addEventListener('error', () => {
+                link.classList.add('loaded');   // убираем бесконечный shimmer при ошибке
+                link.style.background = '#dde5dd';
+            });
 
             link.appendChild(img);
 
@@ -186,7 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
             track.appendChild(link);
         });
 
-        // Собираем массив items и инициализируем карусель
         items = Array.from(track.querySelectorAll('.gallery-item'));
         resizeItems();
     }
