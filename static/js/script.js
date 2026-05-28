@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    // 1. Анимация появления блоков при скроллинге (ТЗ пункт 3)
+
+    // 1. Анимация появления блоков при скроллинге
     const fadeElements = document.querySelectorAll('.fade-element');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -13,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     fadeElements.forEach(el => observer.observe(el));
 
-    // 2. Таймер обратного отсчета (ТЗ пункт 6)
+    // 2. Таймер обратного отсчета
     const targetDate = new Date("June 20, 2026 15:30:00").getTime();
     const countdownEl = document.getElementById("countdown");
 
@@ -36,51 +37,55 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(updateTimer, 60000); // Обновляем раз в минуту для экономии ресурсов
     updateTimer(); // Запуск сразу при загрузке
 
-// 3. Отправка формы RSVP
-    const rsvpForm = document.getElementById("rsvp-form");
-    const successBlock = document.getElementById("success-block");
 
-    rsvpForm.addEventListener("submit", async (e) => {
-        e.preventDefault(); // Предотвращаем перезагрузку страницы
 
-        // 1. БЕЗОПАСНОЕ ПОЛУЧЕНИЕ СТАТУСА
-        const statusElement = document.querySelector('input[name="status"]:checked');
-
-        // Если статус не выбран, останавливаем отправку и просим выбрать
-        if (!statusElement) {
-            alert('Пожалуйста, выберите статус присутствия!');
-            return;
-        }
-
-        const formData = {
-            firstName: document.getElementById("firstName").value,
-            lastName: document.getElementById("lastName").value,
-            status: statusElement.value
-        };
+    async function initGallery() {
+        const track = document.getElementById('gallery-track');
+        if (!track) return;
 
         try {
-            const response = await fetch('/api/rsvp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
-            });
-
-            // 2. ЧИТАЕМ ОТВЕТ ОТ СЕРВЕРА (чтобы получить текст ошибки из app.py)
+            const response = await fetch('/api/gallery');
             const result = await response.json();
 
-            if (response.ok) {
-                // Если статус 200 OK
-                rsvpForm.style.display = 'none'; // Прячем форму
-                successBlock.style.display = 'block'; // Показываем кнопку ТГ-бота
+            if (result.success && result.items.length > 0) {
+                renderInfiniteGallery(result.items, track);
             } else {
-                // Если сервер вернул 400 (например, дубль по IP или пустые поля)
-                // Выводим именно ту ошибку, которую мы написали в app.py
-                alert(result.error || 'Произошла ошибка при отправке.');
+                // Фолбэк, если файлов в папке пока нет
+                document.getElementById('gallery-wrapper').style.display = 'none';
             }
         } catch (error) {
-            // Эта ошибка сработает только если сервер вообще "упал" или нет интернета
-            console.error("Ошибка сети:", error);
-            alert('Ошибка соединения с сервером. Проверьте интернет.');
+            console.error('Network Error: Не удалось загрузить галерею', error);
+            document.getElementById('gallery-wrapper').style.display = 'none';
         }
-    });
+    }
+
+    function renderInfiniteGallery(items, trackElement) {
+        trackElement.innerHTML = ''; // Очистка DOM узла
+
+        // Генерация HTML-строки на основе массива данных
+        const buildNodes = () => {
+            let htmlString = '';
+            items.forEach(item => {
+                const isVideo = item.type === 'video';
+                const iconOverlay = isVideo ? '<div class="video-icon">▶</div>' : '';
+
+                // Ссылка ведет на полноразмерный оригинал
+                htmlString += `
+                    <a href="${item.original}" target="_blank" class="gallery-item">
+                        <img src="${item.preview}" alt="${item.name}" loading="lazy">
+                        ${iconOverlay}
+                    </a>
+                `;
+            });
+            return htmlString;
+        };
+
+        const originalContent = buildNodes();
+
+        /* Дублируем контент. Если элементов мало (ширина меньше ширины экрана),
+          свойство flexbox не сможет создать непрерывный поток.
+          Для надежности дублируем контент дважды.
+        */
+        trackElement.innerHTML = originalContent + originalContent;
+    }
 });
