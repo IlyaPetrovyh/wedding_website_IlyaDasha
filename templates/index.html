@@ -20,7 +20,7 @@
         </div>
     </section>
 
-        <!-- МЕСТО -->
+        <!-- МЕСТО ЗЕЛЕНИНО -->
     <section class="map-section fade-element">
         <h2>Место проведения</h2>
         <div class="map-container">
@@ -41,6 +41,7 @@
         <div class="schedule-list">
             <div class="schedule-item"><span>15:30</span> Сбор гостей и welcome-фуршет</div>
             <div class="schedule-item"><span>16:00</span> Торжественная церемония</div>
+            <div class="schedule-item"><span>23:00</span> Окончание праздника </div>
         </div>
     </section>
 
@@ -70,7 +71,7 @@
         </div>
     </section>
 
-    <!--  ГАЛЕРЕЯ -->
+    <!-- ГАЛЕРЕЯ -->
   <section class="gallery-section fade-element">
         <h2>Фото и видео со свадьбы</h2>
         <p class="gallery-subtitle">Поделитесь лучшими кадрами с нашего праздника</p>
@@ -125,7 +126,7 @@
         </div>
     </div>
 
-        <!-- МЕСТО ШАВЛЯШ -->
+    <!-- МЕСТО ШАВЛЯШ -->
     <section class="map-section fade-element">
         <h2>Место проведения второго дня</h2>
         <div class="map-container">
@@ -136,7 +137,30 @@
         </div>
     </section>
 
-        <!-- РАСПИСАНИЕ ВТОРОГО ДНЯ -->
+        <!-- ГАЛЕРЕЯ ШАВЛЯШ -->
+  <section class="gallery-section fade-element">
+
+        <!-- Карусель -->
+        <div class="carousel-wrapper" id="couple-gallery-wrapper">
+            <button class="carousel-arrow carousel-arrow--left" id="couple-prev-btn" aria-label="Назад">&#8592;</button>
+
+            <div class="carousel-viewport" id="couple-carousel-viewport">
+                <div class="carousel-track" id="couple-gallery-track">
+                    <!-- Заглушки пока грузятся данные -->
+                    <div class="gallery-item skeleton"></div>
+                    <div class="gallery-item skeleton"></div>
+                    <div class="gallery-item skeleton"></div>
+                </div>
+            </div>
+
+            <button class="carousel-arrow carousel-arrow--right" id="couple-next-btn" aria-label="Вперёд">&#8594;</button>
+        </div>
+
+        <!-- Точки-индикаторы -->
+        <div class="carousel-dots" id="couple-carousel-dots"></div>
+    </section>
+
+    <!-- РАСПИСАНИЕ ВТОРОГО ДНЯ -->
     <section class="schedule-section fade-element">
         <h2>Второй день 21 - 22.06</h2>
         <div class="schedule-list">
@@ -145,14 +169,25 @@
     </section>
 
     <section> </section>
-
-    <!-- FOOTER -->
+    <!-- FOOTER-->
     <footer>
         <div class="footer-content">
             <div class="footer-date">20.06.2026</div>
             <div class="footer-timer" id="countdown">Загрузка таймера...</div>
         </div>
     </footer>
+
+    <!-- ЛАЙТБОКС -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Просмотр фото">
+        <button class="lightbox-close" id="lightbox-close" aria-label="Закрыть">✕</button>
+        <button class="lightbox-arrow lightbox-arrow--left"  id="lightbox-prev" aria-label="Предыдущее">&#8592;</button>
+        <button class="lightbox-arrow lightbox-arrow--right" id="lightbox-next" aria-label="Следующее">&#8594;</button>
+
+        <div class="lightbox-content" id="lightbox-content">
+        </div>
+
+        <div class="lightbox-counter" id="lightbox-counter"></div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>

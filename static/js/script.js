@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.fade-element').forEach(el => fadeObserver.observe(el));
 
 
@@ -26,256 +25,387 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const updateTimer = () => {
         const dist = targetDate - Date.now();
-        if (dist <= 0) {
-            countdownEl.textContent = "Свадьба уже началась!";
-            return;
-        }
+        if (dist <= 0) { countdownEl.textContent = "Свадьба уже началась!"; return; }
         const d = Math.floor(dist / 86_400_000);
         const h = Math.floor((dist % 86_400_000) / 3_600_000);
         const m = Math.floor((dist % 3_600_000)  /    60_000);
         countdownEl.textContent = `${d}д ${h}ч ${m}м`;
     };
-
     updateTimer();
     setInterval(updateTimer, 60_000);
 
 
-    // ──────────────────────────────────────────
-    // 3. Карусель
-    // ──────────────────────────────────────────
-    const track      = document.getElementById('gallery-track');
-    const viewport   = document.getElementById('carousel-viewport');
-    const prevBtn    = document.getElementById('prev-btn');
-    const nextBtn    = document.getElementById('next-btn');
-    const dotsEl     = document.getElementById('carousel-dots');
+    // ══════════════════════════════════════════
+    // 3. ЛАЙТБОКС
+    //    Единый для обеих каруселей.
+    //    allItems[] — плоский массив всех карточек
+    //    текущей сессии (заполняется при открытии).
+    // ══════════════════════════════════════════
+    const lightbox        = document.getElementById('lightbox');
+    const lbContent       = document.getElementById('lightbox-content');
+    const lbCloseBtn      = document.getElementById('lightbox-close');
+    const lbPrev          = document.getElementById('lightbox-prev');
+    const lbNext          = document.getElementById('lightbox-next');
+    const lbCounter       = document.getElementById('lightbox-counter');
 
-    let items        = [];   // массив DOM-элементов .gallery-item
-    let currentIndex = 0;    // индекс первой видимой карточки
-    let itemsPerPage = 3;    // количество видимых карточек (меняется при resize)
+    let lbItems  = [];   // [{thumb_api, orig_api, type, name}, ...]
+    let lbIndex  = 0;
 
-    /** Возвращает количество карточек, помещающихся в viewport */
-    function calcItemsPerPage() {
-        const vw = viewport.offsetWidth;
-        if (vw < 400) return 1;
-        if (vw < 700) return 2;
-        return 3;
+    function lbOpen(items, index) {
+        lbItems = items;
+        lbIndex = index;
+        lightbox.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        lbRender();
     }
 
-    /** Пересчитывает ширину каждой карточки под текущий viewport */
-    function resizeItems() {
-        itemsPerPage    = calcItemsPerPage();
-        const gap       = 16;
-        const cardWidth = (viewport.offsetWidth - gap * (itemsPerPage - 1)) / itemsPerPage;
-
-        items.forEach(item => {
-            item.style.width     = `${cardWidth}px`;
-            item.style.minWidth  = `${cardWidth}px`;
-        });
-
-        // Корректируем индекс, чтобы не выйти за границы
-        const maxIndex = Math.max(0, items.length - itemsPerPage);
-        if (currentIndex > maxIndex) currentIndex = maxIndex;
-
-        goTo(currentIndex, false);
-        renderDots();
+    function lbClose() {
+        lightbox.classList.remove('open');
+        document.body.style.overflow = '';
+        lbContent.innerHTML = '';
+        // Останавливаем видео если было
+        const video = lbContent.querySelector('video');
+        if (video) video.pause();
     }
 
-    /** Перемещает трек к нужному индексу */
-    function goTo(index, animate = true) {
-        if (!items.length) return;
+    function lbRender() {
+        const item = lbItems[lbIndex];
+        lbContent.innerHTML = '';
 
-        const maxIndex = Math.max(0, items.length - itemsPerPage);
-        currentIndex   = Math.max(0, Math.min(index, maxIndex));
+        // Счётчик
+        lbCounter.textContent = `${lbIndex + 1} / ${lbItems.length}`;
 
-        const gap       = 16;
-        const cardWidth = items[0].offsetWidth || (viewport.offsetWidth - gap * (itemsPerPage - 1)) / itemsPerPage;
-        const offset    = currentIndex * (cardWidth + gap);
+        // Стрелки
+        lbPrev.disabled = lbIndex === 0;
+        lbNext.disabled = lbIndex === lbItems.length - 1;
 
-        track.style.transition = animate ? 'transform 0.55s cubic-bezier(0.4,0,0.2,1)' : 'none';
-        track.style.transform  = `translateX(-${offset}px)`;
+        if (item.type === 'video') {
+            // Видео: Загружаем через модифицированный orig_api (стриминг inline)
+            const video = document.createElement('video');
+            video.src      = item.orig_api;
+            video.controls = true;
+            video.autoplay = true;
+            video.playsInline = true; // Критично для корректного открытия на iOS в самом лайтбоксе
 
-        prevBtn.disabled = currentIndex === 0;
-        nextBtn.disabled = currentIndex >= maxIndex;
+            // Стилизация для максимального заполнения контейнера лайтбокса
+            video.style.maxWidth  = '100%';
+            video.style.maxHeight = '82vh';
+            video.style.display   = 'block';
+            video.style.margin    = 'auto';
 
-        updateDots();
-    }
-
-    /** Рендерит точки-индикаторы */
-    function renderDots() {
-        if (!dotsEl) return;
-        const total = Math.max(1, items.length - itemsPerPage + 1);
-        dotsEl.innerHTML = '';
-        for (let i = 0; i < total; i++) {
-            const dot = document.createElement('button');
-            dot.className     = 'carousel-dot' + (i === currentIndex ? ' active' : '');
-            dot.ariaLabel     = `Слайд ${i + 1}`;
-            dot.addEventListener('click', () => goTo(i));
-            dotsEl.appendChild(dot);
-        }
-    }
-
-    function updateDots() {
-        if (!dotsEl) return;
-        dotsEl.querySelectorAll('.carousel-dot').forEach((d, i) => {
-            d.classList.toggle('active', i === currentIndex);
-        });
-    }
-
-    // Кнопки-стрелки
-    prevBtn.addEventListener('click', () => goTo(currentIndex - 2));
-    nextBtn.addEventListener('click', () => goTo(currentIndex + 3));
-
-    // Свайп на мобилках
-    let touchStartX = 0;
-    viewport.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
-    viewport.addEventListener('touchend',   e => {
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        if (Math.abs(dx) > 50) goTo(dx < 0 ? currentIndex + 3 : currentIndex - 2);
-    });
-
-    // Адаптация при изменении размера окна
-    window.addEventListener('resize', () => resizeItems());
-
-
-    // ──────────────────────────────────────────
-    // Автопрокрутка карусели
-    // ──────────────────────────────────────────
-    const AUTOPLAY_DELAY = 2600;   // мс между прокрутками — меняй по вкусу
-    let autoplayTimer = null;
-
-    function startAutoplay() {
-        stopAutoplay();
-        autoplayTimer = setInterval(() => {
-            const maxIndex = Math.max(0, items.length - itemsPerPage);
-            // Дошли до конца — возвращаемся в начало
-            goTo(currentIndex >= maxIndex ? 0 : currentIndex + 1);
-        }, AUTOPLAY_DELAY);
-    }
-
-    function stopAutoplay() {
-        if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
-    }
-
-    // Пауза при наведении мыши или касании
-    viewport.addEventListener('mouseenter', stopAutoplay);
-    viewport.addEventListener('mouseleave', startAutoplay);
-    viewport.addEventListener('touchstart',  stopAutoplay,  { passive: true });
-    viewport.addEventListener('touchend',    startAutoplay, { passive: true });
-
-    // Также останавливаем при ручном нажатии стрелок
-    prevBtn.addEventListener('click', () => { stopAutoplay(); startAutoplay(); });
-    nextBtn.addEventListener('click', () => { stopAutoplay(); startAutoplay(); });
-
-    // ──────────────────────────────────────────
-    // 4. Загрузка данных галереи с /api/gallery
-    // ──────────────────────────────────────────
-    async function initGallery() {
-        try {
-            const resp   = await fetch('/api/gallery');
-            const result = await resp.json();
-
-            if (result.success && result.items.length > 0) {
-                renderGallery(result.items);
-            } else {
-                document.getElementById('gallery-wrapper').style.display = 'none';
-            }
-        } catch (err) {
-            console.error('[Gallery] Ошибка загрузки:', err);
-            document.getElementById('gallery-wrapper').style.display = 'none';
-        }
-    }
-
-    function renderGallery(data) {
-        // Убираем скелетоны
-        track.innerHTML = '';
-
-        data.forEach((item, idx) => {
-            const link = document.createElement('a');
-            link.href      = item.original || '#';
-            link.target    = '_blank';
-            link.rel       = 'noopener noreferrer';
-            link.className = 'gallery-item';
-
-            // Ориентация по метаданным — сразу, до загрузки картинки
-            const w = item.width  || 0;
-            const h = item.height || 0;
-            if (w && h) {
-                link.classList.add(h > w * 1.05 ? 'portrait' : 'landscape');
-            }
+            lbContent.appendChild(video);
+        } else {
+            // Спиннер пока идет загрузка картинки высокого разрешения
+            const spinner = document.createElement('div');
+            spinner.className = 'lightbox-spinner';
+            lbContent.appendChild(spinner);
 
             const img = document.createElement('img');
-            img.src     = item.thumb;
-            img.alt     = item.name;
-            // Первые 3 карточки грузим с высоким приоритетом, остальные — лениво
-            if (idx < 3) {
-                img.loading        = 'eager';
-                img.fetchPriority  = 'high';
-            } else {
-                img.loading       = 'lazy';
-                img.fetchPriority = 'low';
+            img.alt = item.name;
+            img.style.maxWidth  = '100%';
+            img.style.maxHeight = '82vh';
+            img.style.objectFit = 'contain';
+            img.style.display   = 'block';
+            img.style.margin    = 'auto';
+
+            // Шаг 1: Сразу выводим маленькую версию (она мгновенно берется из кэша)
+            img.src = item.thumb_api;
+            spinner.remove();
+            img.classList.add('ready');
+
+            // Шаг 2: Параллельно загружаем оптимизированную Яндексом HD-версию (2048px)
+            const fullImg = new Image();
+            fullImg.src = item.large_api;
+            fullImg.addEventListener('load', () => {
+                img.src = fullImg.src; // Бесшовная и плавная подмена на высокое разрешение
+            });
+
+            lbContent.appendChild(img);
+        }
+    }
+
+    function lbGo(delta) {
+        const next = lbIndex + delta;
+        if (next < 0 || next >= lbItems.length) return;
+        lbIndex = next;
+        lbRender();
+    }
+
+    // Кнопки
+    lbCloseBtn.addEventListener('click', lbClose);
+    lbPrev.addEventListener('click',  () => lbGo(-1));
+    lbNext.addEventListener('click',  () => lbGo(+1));
+
+    // Клик на фон закрывает
+    lightbox.addEventListener('click', e => {
+        if (e.target === lightbox || e.target === lbContent) lbClose();
+    });
+
+    // Клавиатура
+    document.addEventListener('keydown', e => {
+        if (!lightbox.classList.contains('open')) return;
+        if (e.key === 'Escape')      lbClose();
+        if (e.key === 'ArrowLeft')   lbGo(-1);
+        if (e.key === 'ArrowRight')  lbGo(+1);
+    });
+
+    // Свайп в лайтбоксе
+    let lbTouchX = 0;
+    lightbox.addEventListener('touchstart', e => { lbTouchX = e.touches[0].clientX; }, { passive: true });
+    lightbox.addEventListener('touchend',   e => {
+        const dx = e.changedTouches[0].clientX - lbTouchX;
+        if (Math.abs(dx) > 50) lbGo(dx < 0 ? +1 : -1);
+    });
+
+
+    // ══════════════════════════════════════════
+    // 4. Универсальная фабрика каруселей
+    // ══════════════════════════════════════════
+    function createCarousel({ trackId, viewportId, prevId, nextId, dotsId, wrapperId, apiUrl, autoplayDelay = 4000 }) {
+
+        const track    = document.getElementById(trackId);
+        const viewport = document.getElementById(viewportId);
+        const prevBtn  = document.getElementById(prevId);
+        const nextBtn  = document.getElementById(nextId);
+        const dotsEl   = document.getElementById(dotsId);
+
+        if (!track || !viewport) {
+            console.warn(`[Carousel] Не найдены элементы: track=${trackId}, viewport=${viewportId}`);
+            return null;
+        }
+
+        let carouselItems = [];       // DOM-элементы карточек
+        let carouselData  = [];       // исходные данные [{thumb_api, orig_api, type, ...}]
+        let currentIndex  = 0;
+        let itemsPerPage  = 3;
+        let autoplayTimer = null;
+
+        // ── Размеры ──────────────────────────
+        function calcItemsPerPage() {
+            const vw = viewport.offsetWidth;
+            if (vw < 400) return 1;
+            if (vw < 700) return 2;
+            return 3;
+        }
+
+        function resizeItems() {
+            itemsPerPage    = calcItemsPerPage();
+            const gap       = 16;
+            const cardWidth = (viewport.offsetWidth - gap * (itemsPerPage - 1)) / itemsPerPage;
+            carouselItems.forEach(item => {
+                item.style.width    = `${cardWidth}px`;
+                item.style.minWidth = `${cardWidth}px`;
+            });
+            const maxIndex = Math.max(0, carouselItems.length - itemsPerPage);
+            if (currentIndex > maxIndex) currentIndex = maxIndex;
+            goTo(currentIndex, false);
+            renderDots();
+        }
+
+        // ── Навигация ────────────────────────
+        function goTo(index, animate = true) {
+            if (!carouselItems.length) return;
+            const maxIndex = Math.max(0, carouselItems.length - itemsPerPage);
+            currentIndex   = Math.max(0, Math.min(index, maxIndex));
+            const gap       = 16;
+            const cardWidth = carouselItems[0].offsetWidth || (viewport.offsetWidth - gap * (itemsPerPage - 1)) / itemsPerPage;
+            const offset    = currentIndex * (cardWidth + gap);
+            track.style.transition = animate ? 'transform 0.55s cubic-bezier(0.4,0,0.2,1)' : 'none';
+            track.style.transform  = `translateX(-${offset}px)`;
+            if (prevBtn) prevBtn.disabled = currentIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentIndex >= maxIndex;
+            updateDots();
+        }
+
+        // ── Точки ────────────────────────────
+        function renderDots() {
+            if (!dotsEl) return;
+            const total = Math.max(1, carouselItems.length - itemsPerPage + 1);
+            dotsEl.innerHTML = '';
+            for (let i = 0; i < total; i++) {
+                const dot = document.createElement('button');
+                dot.className = 'carousel-dot' + (i === currentIndex ? ' active' : '');
+                dot.ariaLabel = `Слайд ${i + 1}`;
+                dot.addEventListener('click', () => goTo(i));
+                dotsEl.appendChild(dot);
             }
+        }
+        function updateDots() {
+            if (!dotsEl) return;
+            dotsEl.querySelectorAll('.carousel-dot').forEach((d, i) =>
+                d.classList.toggle('active', i === currentIndex));
+        }
+
+        // ── Автопрокрутка ────────────────────
+        function startAutoplay() {
+            stopAutoplay();
+            autoplayTimer = setInterval(() => {
+                const maxIndex = Math.max(0, carouselItems.length - itemsPerPage);
+                goTo(currentIndex >= maxIndex ? 0 : currentIndex + 1);
+            }, autoplayDelay);
+        }
+        function stopAutoplay() {
+            if (autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; }
+        }
+
+        // ── События карусели ─────────────────
+        if (prevBtn) prevBtn.addEventListener('click', () => { goTo(currentIndex - 1); stopAutoplay(); startAutoplay(); });
+        if (nextBtn) nextBtn.addEventListener('click', () => { goTo(currentIndex + 1); stopAutoplay(); startAutoplay(); });
+
+        let touchStartX = 0;
+        viewport.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopAutoplay(); }, { passive: true });
+        viewport.addEventListener('touchend',   e => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) > 50) goTo(dx < 0 ? currentIndex + 1 : currentIndex - 1);
+            startAutoplay();
+        });
+        viewport.addEventListener('mouseenter', stopAutoplay);
+        viewport.addEventListener('mouseleave', startAutoplay);
+        window.addEventListener('resize', () => resizeItems());
+
+        // ── Построение карточки ──────────────
+        function buildCard(item, idx) {
+            // DIV вместо <a> — клик открывает лайтбокс, не скачивание
+            const card = document.createElement('div');
+            card.className = 'gallery-item';
+            card.style.cursor = 'pointer';
+
+            // Ориентация по метаданным
+            const w = item.width  || 0;
+            const h = item.height || 0;
+            if (w && h) card.classList.add(h > w * 1.05 ? 'portrait' : 'landscape');
+
+            // Клик → открыть лайтбокс на нужном индексе
+            card.addEventListener('click', () => lbOpen(carouselData, idx));
+
+            const img = document.createElement('img');
+            img.src           = item.thumb_api;
+            img.alt           = item.name;
+            img.loading       = idx < 3 ? 'eager' : 'lazy';
+            img.fetchPriority = idx < 3 ? 'high'  : 'low';
 
             img.addEventListener('load', () => {
-                link.classList.add('loaded');   // убирает shimmer, показывает картинку
-                // Если метаданных не было — определяем ориентацию по реальным размерам
+                card.classList.add('loaded');
                 if (!w || !h) {
-                    link.classList.add(img.naturalHeight > img.naturalWidth * 1.05 ? 'portrait' : 'landscape');
+                    card.classList.add(img.naturalHeight > img.naturalWidth * 1.05 ? 'portrait' : 'landscape');
                     resizeItems();
                 }
-            });
-            img.addEventListener('error', () => {
-                link.classList.add('loaded');   // убираем бесконечный shimmer при ошибке
-                link.style.background = '#dde5dd';
-            });
+            }, { once: true });
 
-            link.appendChild(img);
+            img.addEventListener('error', () => {
+                card.classList.add('loaded');
+                card.style.background = '#e8eee8';
+                card.innerHTML += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;opacity:.35">🖼️</div>';
+            }, { once: true });
+
+            card.appendChild(img);
 
             if (item.type === 'video') {
                 const icon = document.createElement('div');
                 icon.className = 'video-icon';
-                link.appendChild(icon);
+                card.appendChild(icon);
             }
+            return card;
+        }
 
-            track.appendChild(link);
-        });
+        // ── Рендер галереи ───────────────────
+        function renderItems(data) {
+            carouselData = data;
+            track.innerHTML = '';
+            data.forEach((item, idx) => track.appendChild(buildCard(item, idx)));
+            carouselItems = Array.from(track.querySelectorAll('.gallery-item'));
+            resizeItems();
+            startAutoplay();
+        }
 
-        items = Array.from(track.querySelectorAll('.gallery-item'));
-        resizeItems();
+        // ── Загрузка с API ───────────────────
+        async function load() {
+            track.innerHTML = `
+                <div class="gallery-item skeleton"></div>
+                <div class="gallery-item skeleton"></div>
+                <div class="gallery-item skeleton"></div>`;
+
+            try {
+                const resp   = await fetch(apiUrl);
+                const result = await resp.json();
+
+                console.log(`[Carousel ${apiUrl}] items:`, result.items?.length ?? 0);
+
+                if (result.success && result.items && result.items.length > 0) {
+                    renderItems(result.items);
+                } else {
+                    track.innerHTML = '';
+                    const msg = document.createElement('p');
+                    msg.style.cssText = 'text-align:center;color:#999;padding:60px 20px;width:100%;font-family:inherit;';
+                    msg.textContent   = 'Фотографии появятся здесь в день свадьбы';
+                    track.appendChild(msg);
+                    if (prevBtn) prevBtn.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                }
+            } catch (err) {
+                track.innerHTML = '';
+                const msg = document.createElement('p');
+                msg.style.cssText = 'text-align:center;color:#c00;padding:60px 20px;width:100%;';
+                msg.textContent   = 'Не удалось загрузить галерею';
+                track.appendChild(msg);
+                console.error(`[Carousel ${apiUrl}] Ошибка:`, err);
+            }
+        }
+
+        load();
+        return { reload: load };
     }
 
-    initGallery();
+
+    // ══════════════════════════════════════════
+    // 5. Инициализация каруселей
+    // ══════════════════════════════════════════
+
+    const guestsCarousel = createCarousel({
+        trackId:      'gallery-track',
+        viewportId:   'carousel-viewport',
+        prevId:       'prev-btn',
+        nextId:       'next-btn',
+        dotsId:       'carousel-dots',
+        wrapperId:    'gallery-wrapper',
+        apiUrl:       '/api/gallery',
+        autoplayDelay: 4000,
+    });
+
+    createCarousel({
+        trackId:      'couple-gallery-track',
+        viewportId:   'couple-carousel-viewport',
+        prevId:       'couple-prev-btn',
+        nextId:       'couple-next-btn',
+        dotsId:       'couple-carousel-dots',
+        wrapperId:    'couple-gallery-wrapper',
+        apiUrl:       '/api/gallery/couple',
+        autoplayDelay: 5000,
+    });
 
 
-    // ──────────────────────────────────────────
-    // 5. Модалка загрузки
-    // ──────────────────────────────────────────
-    const modal       = document.getElementById('upload-modal');
-    const fileInput   = document.getElementById('file-input');
-    const dropZone    = document.getElementById('drop-zone');
-    const queueEl     = document.getElementById('upload-queue');
-    const submitBtn   = document.getElementById('upload-submit');
+    // ══════════════════════════════════════════
+    // 6. Модалка загрузки
+    // ══════════════════════════════════════════
+    const modal     = document.getElementById('upload-modal');
+    const fileInput = document.getElementById('file-input');
+    const dropZone  = document.getElementById('drop-zone');
+    const queueEl   = document.getElementById('upload-queue');
+    const submitBtn = document.getElementById('upload-submit');
 
-    let pendingFiles  = [];  // File[]
+    let pendingFiles = [];
 
     window.openUploadModal = function () {
         modal.classList.add('open');
         document.body.style.overflow = 'hidden';
     };
-
     window.closeUploadModal = function (event) {
-        // Закрываем только по клику на backdrop или крестик
         if (event && event.target !== modal) return;
         modal.classList.remove('open');
         document.body.style.overflow = '';
     };
 
-    // Выбор файла через <input>
-    fileInput.addEventListener('change', () => {
-        addFiles(Array.from(fileInput.files));
-        fileInput.value = '';   // сброс, чтобы можно было выбрать снова
-    });
-
-    // Drag & Drop
+    fileInput.addEventListener('change', () => { addFiles(Array.from(fileInput.files)); fileInput.value = ''; });
     dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', e => {
@@ -288,7 +418,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const allowed = /\.(jpe?g|png|gif|webp|mp4|mov|avi|heic)$/i;
         files.forEach(f => {
             if (!allowed.test(f.name)) return;
-            if (pendingFiles.some(p => p.name === f.name && p.size === f.size)) return; // дедупликация
+            if (pendingFiles.some(p => p.name === f.name && p.size === f.size)) return;
             pendingFiles.push(f);
             renderQueueItem(f, 'pending');
         });
@@ -298,26 +428,21 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderQueueItem(file, status) {
         const id   = `qi-${file.name.replace(/\W/g, '_')}`;
         let el     = document.getElementById(id);
-        const icon = status === 'pending' ? '📄' : status === 'loading' ? '⏳' : status === 'ok' ? '✅' : '❌';
-
+        const icon = { pending: '📄', loading: '⏳', ok: '✅', error: '❌' }[status] || '📄';
         if (!el) {
-            el            = document.createElement('div');
-            el.id         = id;
-            el.className  = 'queue-item';
-            el.innerHTML  = `<span class="queue-item-status">${icon}</span>
-                             <span class="queue-item-name">${file.name}</span>`;
+            el = document.createElement('div');
+            el.id        = id;
+            el.className = 'queue-item';
+            el.innerHTML = `<span class="queue-item-status">${icon}</span><span class="queue-item-name">${file.name}</span>`;
             queueEl.appendChild(el);
         } else {
             el.querySelector('.queue-item-status').textContent = icon;
-            el.querySelector('.queue-item-status').className   = `queue-item-status ${status}`;
         }
     }
 
     window.submitFiles = async function () {
         if (!pendingFiles.length) return;
-
         submitBtn.disabled = true;
-
         const toUpload = [...pendingFiles];
         pendingFiles   = [];
 
@@ -326,7 +451,6 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const fd = new FormData();
                 fd.append('file', file);
-
                 const resp   = await fetch('/api/upload', { method: 'POST', body: fd });
                 const result = await resp.json();
                 renderQueueItem(file, result.success ? 'ok' : 'error');
@@ -334,8 +458,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 renderQueueItem(file, 'error');
             }
         }
-
-        // Обновляем галерею после загрузки
-        setTimeout(() => { initGallery(); }, 1000);
+        setTimeout(() => { if (guestsCarousel) guestsCarousel.reload(); }, 1500);
     };
 });
