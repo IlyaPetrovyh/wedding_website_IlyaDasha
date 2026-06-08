@@ -14,7 +14,7 @@ app = Flask(__name__)
 # ───────────────────────────────────────────────
 # Конфигурация
 # ───────────────────────────────────────────────
-YANDEX_PUBLIC_URL   = os.getenv('YANDEX_PUBLIC_URL', 'https://disk.yandex.ru/d/GIXFpB9WYoReyA')
+YANDEX_PUBLIC_URL   = os.getenv('YANDEX_PUBLIC_URL', 'https://disk.yandex.ru/d/PDkGv3aF63URNg')
 YANDEX_API_BASE     = 'https://cloud-api.yandex.net/v1/disk'
 YANDEX_OAUTH_TOKEN  = os.getenv('YANDEX_OAUTH_TOKEN', '')   # токен для загрузки файлов
 UPLOAD_FOLDER_PATH  = os.getenv('YANDEX_UPLOAD_FOLDER', '/Свадьба Ильи и Даши/Фото от гостей')
