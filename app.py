@@ -270,12 +270,13 @@ def thumb_proxy():
 
 
 @app.route('/api/orig')
-def orig_redirect():
+def orig_proxy():
     """
-    Редирект на свежую прямую ссылку оригинала.
-    Браузер перенаправляется к файлу напрямую.
+    Стабильный inline-прокси для видео и тяжелых медиафайлов.
+    Корректно обрабатывает Range-запросы браузера без принудительного чанкирования,
+    исключая появление серого экрана в плеере лайтбокса.
     """
-    pub_url   = request.args.get('pub', '')
+    pub_url = request.args.get('pub', '')
     file_path = request.args.get('path', '')
 
     if not pub_url or not file_path:
@@ -285,28 +286,61 @@ def orig_redirect():
     if not download_url:
         return 'File not available', 404
 
-    return redirect(download_url, code=302)
+    # Перенаправляем заголовок Range от браузера к серверам Яндекса
+    headers = {}
+    range_header = request.headers.get('Range', None)
+    if range_header:
+        headers['Range'] = range_header
 
+    if YANDEX_OAUTH_TOKEN:
+        headers['Authorization'] = f'OAuth {YANDEX_OAUTH_TOKEN}'
 
-@app.route('/api/upload', methods=['POST'])
-def upload_api():
-    if 'file' not in request.files:
-        return jsonify({'success': False, 'error': 'Файл не найден'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'success': False, 'error': 'Пустое имя файла'}), 400
-    if not allowed_file(file.filename):
-        return jsonify({'success': False, 'error': 'Недопустимый тип файла'}), 400
+    try:
+        # ВАЖНО: Не используем stream=True совместно с Response(iter_content),
+        # чтобы избежать автоматической генерации Transfer-Encoding: chunked.
+        yandex_resp = requests.get(download_url, headers=headers, timeout=15)
 
-    filename   = secure_filename(file.filename)
-    file_bytes = file.read()
-    result     = upload_to_yandex_disk(file_bytes, filename)
+        # Переопределяем MIME-тип, если Яндекс отдал сырой бинарный octet-stream
+        ext = file_path.split('.')[-1].lower()
+        content_type = yandex_resp.headers.get('Content-Type', '')
 
-    if result['success']:
-        # Инвалидируем кэш метаданных гостевой папки
-        _get_cache(YANDEX_PUBLIC_URL)['timestamp'] = 0
-        return jsonify({'success': True, 'message': 'Файл успешно загружен!'})
-    return jsonify(result), 500
+        if 'octet-stream' in content_type or not content_type:
+            if ext == 'mp4':
+                content_type = 'video/mp4'
+            elif ext in ['mov', 'qt']:
+                content_type = 'video/quicktime'
+            elif ext == 'avi':
+                content_type = 'video/x-msvideo'
+            elif ext in ['jpg', 'jpeg']:
+                content_type = 'image/jpeg'
+            elif ext == 'png':
+                content_type = 'image/png'
+            else:
+                content_type = 'video/mp4'  # Дефолтный фолбек для видео плеера
+
+        # Формируем строгие заголовки ответа согласно спецификации HTTP 206 / 200
+        resp_headers = {
+            'Content-Type': content_type,
+            'Content-Disposition': 'inline',
+            'Accept-Ranges': 'bytes'
+        }
+
+        # Пробрасываем оригинальные параметры позиционирования байт
+        if 'Content-Range' in yandex_resp.headers:
+            resp_headers['Content-Range'] = yandex_resp.headers['Content-Range']
+        if 'Content-Length' in yandex_resp.headers:
+            resp_headers['Content-Length'] = yandex_resp.headers['Content-Length']
+
+        # Возвращаем фиксированный бинарный контент с сохранением оригинального статус-кода (200 или 206)
+        return Response(
+            yandex_resp.content,
+            status=yandex_resp.status_code,
+            headers=resp_headers
+        )
+
+    except requests.RequestException as e:
+        print(f'[Orig Proxy] Ошибка трансляции медиапотока: {e}')
+        return 'Error streaming file', 502
 
 
 @app.route('/api/debug')
